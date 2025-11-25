@@ -1,0 +1,18 @@
+{
+    "name": "csvinventory",
+    "shortName": "csvinventory",
+    "version": "0.0.0",
+    "author": "",
+    "description": "Get meshcentral agents info in csv",
+    "hasAdminPanel": true,
+    "homepage": " https://github.com/freaky-hue/csvinventory",
+    "changelogUrl": "https://raw.githubusercontent.com/freaky-hue/csvinventory/refs/heads/main/changelog.md",
+    "configUrl": "https://raw.githubusercontent.com/freaky-hue/csvinventory/refs/heads/main/config.json",
+    "downloadUrl": "https://github.com/freaky-hue/csvinventory/archive/refs/tags/master.zip",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/freaky-hue/csvinventory.git"
+    },
+    "versionHistoryUrl": "",
+    "meshCentralCompat": ">=0.4.4-s"
+}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<style>
+    * {
+        font-family: Verdana, Geneva, Tahoma, sans-serif
+    }
+
+
+    #submit-config,
+    #but-submit {
+        font-size: 25px;
+        font-family: Arial, Helvetica, sans-serif;
+        border: 1px solid #000000;
+        border-radius: 5px;
+        background: rgba(233, 233, 237, 100%)
+    }
+
+    #submit-config:hover,
+    #but-submit:hover {
+        cursor: pointer;
+        background: rgba(149, 149, 149, 0.5);
+        border: 1px solid #003366;
+        border-radius: 5px;
+    }
+
+    .config-submit {
+        display: flex;
+        justify-content: center;
+    }
+
+    .get-config {
+        display: flex;
+        justify-content: center;
+    }
+
+    .get-config textarea {
+        width: 100%;
+        height: 150px;
+
+    }
+
+    .titlecont {
+        display: flex;
+        justify-content: center;
+    }
+
+    .titlecont h1 {
+        font-size: 46px;
+    }
+
+
+    .form-div {
+        display: flex;
+        justify-content: center;
+    }
+
+
+
+    .form-div input[type="submit"] {
+        width: 37%;
+        height: 60px;
+    }
+</style>
+
+<body>
+    <div class="titlecont">
+        <h1>{{title}}</h1>
+    </div>
+
+
+
+    {{#if ex}}
+
+    <form id="savefile">
+        <div class="form-div">
+            <input id="but-submit" type="submit" value="Save file">
+
+
+        </div>
+
+    </form>
+
+
+
+    {{else}}
+    <form id="sub-conf">
+        <div class="get-config">
+            <textarea id="config-settings">{
+    "user_login_token_username": "",
+    "user_login_token_password": "",
+    "file_name": "DevicesInfo.csv"
+}</textarea>
+        </div>
+        <div class="config-submit">
+            <input id="submit-config" type="submit" value="Submit Config" required>
+        </div>
+    </form>
+
+
+    {{/if}}
+
+    <script>
+        if (!{{ ex }}) {
+
+            document.getElementById("sub-conf").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                try {
+
+                    const cfg = JSON.parse(document.getElementById("config-settings").value);
+
+                    const cfgArr = Object.getOwnPropertyNames(cfg)
+
+                    if (cfgArr.includes("user_login_token_username" && "user_login_token_password")) {
+
+
+                        var keyN = [];
+                        for (const [key, value] of Object.entries(cfg)) {
+                            if (value.trim().length < 1) {
+                                keyN.push(key);
+                            }
+                        }
+
+                        if (keyN.length >= 1) {
+                            alert(keyN.map((a) => a + " can't be empty" + "\n").join(""));
+
+                        } else {
+                            const cc = confirm("Create config.json?")
+                            if (cc) {
+                                const response = await fetch("plugin/csvinventory/config", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/text",
+                                    },
+                                    body: JSON.stringify(cfg)
+                                });
+
+                                if (response.ok) {
+                                    location.reload();
+                                } else if (response.status === 401) {
+                                    alert("Invalid Credentials")
+                                }
+
+                            }
+                        }
+
+                    } else {
+                        alert("Must include user_login_token_username and user_login_token_password")
+                    }
+                } catch (error) {
+                    alert("Check JSON syntax");
+                }
+            })
+
+        } else {
+
+            document.getElementById("savefile").addEventListener("submit", async (e) => {
+                document.getElementById("but-submit").disabled = true;
+
+                e.preventDefault();
+
+                const dec = confirm("Save File?")
+                if (dec) {
+
+                    const response = await fetch("/plugin/csvinventory/file", {
+                        method: "POST",
+                        body: true
+                    })
+
+
+
+                    if (response.ok) {
+
+                        const responseSave = await fetch("/plugin/csvinventory/savefile", {
+                            method: "POST",
+                        })
+
+                        if (responseSave.ok) {
+                            const blob = await responseSave.blob();
+                            console.log(blob)
+                            const url = await window.URL.createObjectURL(blob);
+                            const a = await document.createElement("a");
+                            a.href = url;
+                            a.download = "{{file_name}}";
+                            await document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                        }
+
+                    }
+
+
+                }
+
+                //setTimeout(() => {
+                //}, 100)
+
+
+                document.getElementById("but-submit").disabled = false;
+            })
+
+        }
+
+    </script>
+</body>
+
+</html>
